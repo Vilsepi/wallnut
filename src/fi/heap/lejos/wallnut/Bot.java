@@ -19,76 +19,76 @@ import lejos.robotics.subsumption.Behavior;
  */
 
 public class Bot {
-	final static RegulatedMotor leftMotor = Motor.A;
-	final static RegulatedMotor rightMotor = Motor.C;
-	final static SensorPort touchSensorPort = SensorPort.S4;
-	final static SensorPort sonicSensorPort = SensorPort.S1;
-	
-	final static int driveSpeed = 275;
-	final static float turnRateModifier = 1;
-	
-	public static void main(String[] args) {
-		leftMotor.setSpeed(driveSpeed);
-		rightMotor.setSpeed(driveSpeed);
+    final static RegulatedMotor leftMotor = Motor.A;
+    final static RegulatedMotor rightMotor = Motor.C;
+    final static SensorPort touchSensorPort = SensorPort.S4;
+    final static SensorPort sonicSensorPort = SensorPort.S1;
 
-		Behavior[] behaviorList = {
-				new DriveForward(),
-				new DetectWall()
-		};
+    final static int driveSpeed = 275;
+    final static float turnRateModifier = 1;
 
-		Arbitrator arbitrator = new Arbitrator(behaviorList);
+    public static void main(String[] args) {
+        leftMotor.setSpeed(driveSpeed);
+        rightMotor.setSpeed(driveSpeed);
 
-		LCD.drawString("Wallnut", 0, 1);
-		Button.waitForAnyPress();
-		arbitrator.start();
-	}
+        Behavior[] behaviorList = {
+                new DriveForward(),
+                new DetectWall()
+        };
+
+        Arbitrator arbitrator = new Arbitrator(behaviorList);
+
+        LCD.drawString("Wallnut", 0, 1);
+        Button.waitForAnyPress();
+        arbitrator.start();
+    }
 }
 
 
 class DriveForward implements Behavior {
-	private boolean _suppressed = false;
+    private boolean _suppressed = false;
 
-	public boolean takeControl() {
-		return true;
-	}
+    public boolean takeControl() {
+        return true;
+    }
 
-	public void suppress() {
-		_suppressed = true;
-	}
+    public void suppress() {
+        _suppressed = true;
+    }
 
-	public void action() {
-		_suppressed = false;
-		Bot.leftMotor.forward();
-		Bot.rightMotor.forward();
-		while (!_suppressed) {
-			Thread.yield();
-		}
-		Bot.leftMotor.stop(); 
-		Bot.leftMotor.stop();
-	}
+    public void action() {
+        _suppressed = false;
+        Bot.leftMotor.forward();
+        Bot.rightMotor.forward();
+        while (!_suppressed) {
+            Thread.yield();
+        }
+        Bot.leftMotor.stop(); 
+        Bot.leftMotor.stop();
+    }
 }
 
 
 class DetectWall implements Behavior {
-	private TouchSensor touch;
-	private UltrasonicSensor sonar;
-	
-	public DetectWall() {
-		touch = new TouchSensor(Bot.touchSensorPort);
-		sonar = new UltrasonicSensor(Bot.sonicSensorPort);
-	}
+    private TouchSensor touch;
+    private UltrasonicSensor sonar;
 
-	public boolean takeControl() {
-		sonar.ping();
-		return touch.isPressed() || sonar.getDistance() < 30;
-	}
+    public DetectWall() {
+        touch = new TouchSensor(Bot.touchSensorPort);
+        sonar = new UltrasonicSensor(Bot.sonicSensorPort);
+    }
 
-	public void suppress() {
-	}
+    public boolean takeControl() {
+        sonar.ping();
+        return touch.isPressed() || sonar.getDistance() < 30;
+    }
 
-	public void action() {
-		Bot.leftMotor.rotate(-180, true);
-		Bot.rightMotor.rotate((int) (-180+(-180*Bot.turnRateModifier)));
-	}
+    public void suppress() {
+    }
+
+    public void action() {
+        Bot.leftMotor.rotate(-180, true);
+        Bot.rightMotor.rotate((int) (-180+(-180*Bot.turnRateModifier)));
+    }
 }
 
